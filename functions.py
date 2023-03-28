@@ -5,7 +5,6 @@ from classes import Data
 import datetime
 from dateutil.relativedelta import relativedelta
 
-# connect = sqlite3.connect('processing.db', check_same_thread=False)
 connect = sqlite3.connect(DATA_BASE, check_same_thread=False)
 cursor = connect.cursor()
 
