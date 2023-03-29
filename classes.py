@@ -17,6 +17,7 @@ class Data:
         self.qmax = None
         self.intern = None
         self.standart = None
+        self.standart_fif = None
         self.phone = None
         self.processing_date = None
         self.valid_for = None

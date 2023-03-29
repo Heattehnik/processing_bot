@@ -1,4 +1,5 @@
 import sqlite3
+import xml.etree.ElementTree as xml
 from env import DATA_BASE
 import openpyxl as op
 from classes import Data
@@ -19,19 +20,19 @@ def ngr_check(ngr: str) -> bool:
 
 
 def insert_data(data: object, user_id: int) -> bool:
-    cursor.execute(f"SELECT si_number FROM uploaded_data WHERE si_number = '{data.si_number}'")
+    cursor.execute(f"SELECT si_number FROM test_uploaded_data WHERE si_number = '{data.si_number}'")
     result = cursor.fetchone()
     if not result:
-        cursor.execute('INSERT INTO uploaded_data (act_num, ngr, si_type, si_number, owner,'
+        cursor.execute('INSERT INTO test_uploaded_data (act_num, ngr, si_type, si_number, owner,'
                        'address, readings, water_temp, verification_date, valid_date, air_temp, humidity,'
                        'atm_pressure, qmin, qmax, intern, standart, phone, processing_date, user_id, valid_for, '
-                       'conclusion, verifier_surname, verifier_name, verifier_patronymic) '
-                       'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                       'conclusion, verifier_surname, verifier_name, verifier_patronymic, xml, standart_fif) '
+                       'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                        (data.act_num, data.ngr, data.si_type, data.si_number, data.owner, data.address, data.readings,
                         data.water_temp, data.verification_date, data.valid_date, data.air_temp, data.humidity,
                         data.atm_pressure, data.qmin, data.qmax, data.intern, data.standart, data.phone,
                         data.processing_date, user_id, data.valid_for, data.conclusion, data.verifier_surname,
-                        data.verifier_name, data.verifier_patronymic))
+                        data.verifier_name, data.verifier_patronymic, 0, data.standart_fif))
         connect.commit()
         return True
     else:
@@ -58,9 +59,11 @@ def choose_verifier(verifier):
 
 
 def user_reg(user_id, name, surname, nickname):
-    cursor.execute('INSERT INTO login_id (user_id, name, surname, nickname) VALUES (?,?,?,?)', (user_id, name, surname, nickname))
+    cursor.execute('INSERT INTO login_id (user_id, name, surname, nickname) VALUES (?,?,?,?)',
+                   (user_id, name, surname, nickname))
     connect.commit()
     print('Пользователь зарегистрирован!')
+
 
 def user_delete(user_id):
     cursor.execute(f'DELETE FROM login_id WHERE user_id = "{user_id}"')
@@ -75,6 +78,16 @@ def is_allowed_id(user_id: int):
         return res[0]
     else:
         return 0
+
+def get_standart_fif(data):
+    cursor.execute(f'SELECT standart_fif FROM standarts WHERE standart_manufacture_num = "{data.standart}" AND '
+                   f'standart_valid_until > "{data.verification_date}" ')
+    res = cursor.fetchone()
+    if type(res) == tuple:
+        return res[0]
+    else:
+        return 0
+
 
 
 def processing(file, user_id):
@@ -102,6 +115,7 @@ def processing(file, user_id):
             data.qmax = sheet_read[f'O{i}'].value
             data.intern = sheet_read[f'Q{i}'].value.partition(' ')[0].upper()
             data.standart = sheet_read[f'R{i}'].value
+            data.standart_fif = get_standart_fif(data)
             data.phone = sheet_read[f'S{i}'].value
             data.processing_date = datetime.datetime.now()
             verifier = choose_verifier(data.intern)
@@ -137,16 +151,19 @@ def processing(file, user_id):
             if not verifier:
                 error = 'УКАЗАННЫЙ ПОВЕРИТЕЛЬ НЕ НАЙДЕН'
                 break
-            if not isinstance(data.verification_date, datetime.datetime):
-                error = 'НЕКОРРЕКТНАЯ ДАТА ПОВЕРКИ'
+            if not isinstance(data.verification_date, datetime.datetime) or data.verification_date >= data.valid_date:
+                error = 'НЕКОРРЕКТНАЯ ДАТА'
                 break
-            if not isinstance(data.valid_date, datetime.datetime) and data.valid_date != None:
-                error = 'НЕКОРРЕКТНАЯ ДАТА ДЕЙСТВИТЕЛЬНО ДО'
+            if not isinstance(data.valid_date, datetime.datetime) and data.valid_date is not None:
+                error = 'НЕКОРРЕКТНАЯ ДАТА'
+                break
+            if not data.standart_fif:
+                error = 'ЭТАЛОН НЕ НАЙДЕН'
                 break
             insert_data(data, user_id)
             i += 1
     except:
-      pass
+        pass
     return error, i
 
 
@@ -190,3 +207,102 @@ def make_file(date):
         pass
 
 
+def to_xml():
+    cursor.execute('SELECT * FROM test_uploaded_data WHERE xml = "0"')
+    result = cursor.fetchall()
+    cursor.execute('UPDATE test_uploaded_data SET xml = "1" WHERE xml = "0"')
+    connect.commit()
+    print(result)
+    return result
+
+
+def make_xml():
+    data = to_xml()
+    i = 0
+    output = []
+
+    while i < len(data):
+        result = xml.Element("gost:result")
+
+        miInfo = xml.SubElement(result, "gost:miInfo")
+
+        singleMi = xml.SubElement(miInfo, "gost:singleMI")
+
+        mitypeNumber = xml.SubElement(singleMi, "gost:mitypeNumber")
+        mitypeNumber.text = f'{data[i][2]}'
+
+        manufactureNum = xml.SubElement(singleMi, "gost:manufactureNum")
+        manufactureNum.text = f'{data[i][4]}'
+
+        modification = xml.SubElement(singleMi, "gost:modification")
+        modification.text = f'{data[i][3]}'
+
+        singCipher = xml.SubElement(result, "gost:signCipher")
+        singCipher.text = "ГШИ"
+
+        miOwner = xml.SubElement(result, "gost:miOwner")
+        miOwner.text = f'{data[i][5]}'
+
+        vrfDate = xml.SubElement(result, "gost:vrfDate")
+        vrfDate.text = f'{data[i][9]}'
+
+        validDate = xml.SubElement(result, "gost:validDate")
+        validDate.text = f'{data[i][10]}'
+
+        type = xml.SubElement(result, "gost:type")
+        type.text = "2"
+
+        calibration = xml.SubElement(result, "gost:calibration")
+        calibration.text = "false"
+
+        if data[i][10]:
+            applicable = xml.SubElement(result, "gost:applicable")
+
+            signPass = xml.SubElement(applicable, "gost:signPass")
+            signPass.text = "False"
+
+            singMi = xml.SubElement(applicable, "gost:signMi")
+            singMi.text = "False"
+        else:
+            inapplicable = xml.SubElement(result, "gost:inapplicable")
+
+            reasons = xml.SubElement(inapplicable, "gost:reasons")
+            reasons.text = "относительная погрешность превышает пределы допустимой"
+
+        docTitle = xml.SubElement(result, "gost:docTitle")
+        docTitle.text = "МИ 1592-2015"
+
+        gostMeans = xml.SubElement(result, "gost:means")
+
+        mieta = xml.SubElement(gostMeans, "gost:mieta")
+
+        number = xml.SubElement(mieta, "gost:number")
+        number.text = "72850.18.3Р.00349682"
+
+        conditions = xml.SubElement(result, "gost:conditions")
+
+        temperature = xml.SubElement(conditions, "gost:temperature")
+        temperature.text = f'{data[i][13]}'
+
+        pressure = xml.SubElement(conditions, "gost:pressure")
+        pressure.text = f'{data[i][15]}'
+
+        hymidity = xml.SubElement(conditions, "gost:hymidity")
+        hymidity.text = f'{data[i][14]}'
+
+        message = xml.tostring(result, "utf-8")
+        output.append(message.decode('utf-8'))
+
+        i = i + 1
+
+
+    final = "".join(output)
+    doc = '<?xml version="1.0" encoding="utf-8" ?><gost:application xmlns:gost="urn://fgis-arshin.gost.ru/' \
+          'module-verifications/import/2020-06-19">' + final + '</gost:application>'
+
+    return doc
+
+
+if __name__ == "__main__":
+    # to_xml()
+    processing('test.xlsx', 11111)
