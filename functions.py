@@ -26,13 +26,13 @@ def insert_data(data: object, user_id: int) -> bool:
         cursor.execute('INSERT INTO test_uploaded_data (act_num, ngr, si_type, si_number, owner,'
                        'address, readings, water_temp, verification_date, valid_date, air_temp, humidity,'
                        'atm_pressure, qmin, qmax, intern, standart, phone, processing_date, user_id, valid_for, '
-                       'conclusion, verifier_surname, verifier_name, verifier_patronymic, xml, standart_fif) '
-                       'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                       'conclusion, verifier_surname, verifier_name, verifier_patronymic, xml, standart_fif, mp) '
+                       'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                        (data.act_num, data.ngr, data.si_type, data.si_number, data.owner, data.address, data.readings,
                         data.water_temp, data.verification_date, data.valid_date, data.air_temp, data.humidity,
                         data.atm_pressure, data.qmin, data.qmax, data.intern, data.standart, data.phone,
                         data.processing_date, user_id, data.valid_for, data.conclusion, data.verifier_surname,
-                        data.verifier_name, data.verifier_patronymic, 0, data.standart_fif))
+                        data.verifier_name, data.verifier_patronymic, 0, data.standart_fif, data.mp))
         connect.commit()
         return True
     else:
@@ -89,6 +89,11 @@ def get_standart_fif(data):
         return 0
 
 
+def get_mp(ngr):
+    cursor.execute(f'SELECT mp FROM si_types WHERE ngr = "{ngr}"')
+    res = cursor.fetchone()
+    return res[0]
+
 
 def processing(file, user_id):
     try:
@@ -119,6 +124,7 @@ def processing(file, user_id):
             data.phone = sheet_read[f'S{i}'].value
             data.processing_date = datetime.datetime.now()
             verifier = choose_verifier(data.intern)
+            data.mp = get_mp(data.ngr)
             if verifier:
                 splited_verifier = verifier[0].split(' ')
                 data.verifier_surname = splited_verifier[0]
@@ -218,6 +224,7 @@ def to_xml():
 
 def make_xml():
     data = to_xml()
+    print(data)
     i = 0
     output = []
 
@@ -270,14 +277,14 @@ def make_xml():
             reasons.text = "относительная погрешность превышает пределы допустимой"
 
         docTitle = xml.SubElement(result, "gost:docTitle")
-        docTitle.text = "МИ 1592-2015"
+        docTitle.text = f'{data[i][28]}'
 
         gostMeans = xml.SubElement(result, "gost:means")
 
         mieta = xml.SubElement(gostMeans, "gost:mieta")
 
         number = xml.SubElement(mieta, "gost:number")
-        number.text = "72850.18.3Р.00349682"
+        number.text = f'{data[i][20]}'
 
         conditions = xml.SubElement(result, "gost:conditions")
 
@@ -304,5 +311,6 @@ def make_xml():
 
 
 if __name__ == "__main__":
+    # make_xml()
     # to_xml()
     processing('test.xlsx', 11111)

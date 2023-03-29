@@ -25,6 +25,7 @@ class Data:
         self.verifier_name = None
         self.verifier_patronymic = None
         self.conclusion = None
+        self.mp = None
 
 
 
