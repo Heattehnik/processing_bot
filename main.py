@@ -1,6 +1,6 @@
 from env import BOT_TOKEN
 import telebot
-from functions import processing, make_file, is_allowed_id, user_reg, user_delete
+from functions import processing, make_file, is_allowed_id, user_reg, user_delete, make_xml
 import os
 
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -35,6 +35,14 @@ def processing_file(message):
         bot.send_message(message.chat.id, f'Ошибка в строке {check[1] - 1} {check[0]}')
     else:
         bot.send_message(message.chat.id, 'Обработка завершена!')
+        xml_ = make_xml()
+        print(xml_)
+
+        with open(f'{message.document.file_name[:-5]} ---{xml_[1]}.xml', 'a+') as file:
+            file.writelines(xml_[0])
+            file.seek(0)
+            bot.send_document(message.chat.id, file)
+        os.remove(f'{message.document.file_name[:-5]} ---{xml_[1]}.xml')
 
 
 # @bot.message_handler(commands=['download'])

@@ -218,13 +218,11 @@ def to_xml():
     result = cursor.fetchall()
     cursor.execute('UPDATE test_uploaded_data SET xml = "1" WHERE xml = "0"')
     connect.commit()
-    print(result)
     return result
 
 
 def make_xml():
     data = to_xml()
-    print(data)
     i = 0
     output = []
 
@@ -251,10 +249,12 @@ def make_xml():
         miOwner.text = f'{data[i][5]}'
 
         vrfDate = xml.SubElement(result, "gost:vrfDate")
-        vrfDate.text = f'{data[i][9]}'
-
-        validDate = xml.SubElement(result, "gost:validDate")
-        validDate.text = f'{data[i][10]}'
+        input_date = datetime.datetime.strptime(data[i][9], '%Y-%m-%d %H:%M:%S')
+        vrfDate.text = input_date.strftime('%Y-%m-%d')
+        if data[i][10]:
+            validDate = xml.SubElement(result, "gost:validDate")
+            input_date = datetime.datetime.strptime(data[i][10], '%Y-%m-%d %H:%M:%S')
+            validDate.text = input_date.strftime('%Y-%m-%d')
 
         type = xml.SubElement(result, "gost:type")
         type.text = "2"
@@ -266,10 +266,10 @@ def make_xml():
             applicable = xml.SubElement(result, "gost:applicable")
 
             signPass = xml.SubElement(applicable, "gost:signPass")
-            signPass.text = "False"
+            signPass.text = "false"
 
             singMi = xml.SubElement(applicable, "gost:signMi")
-            singMi.text = "False"
+            singMi.text = "false"
         else:
             inapplicable = xml.SubElement(result, "gost:inapplicable")
 
@@ -302,15 +302,14 @@ def make_xml():
 
         i = i + 1
 
-
     final = "".join(output)
     doc = '<?xml version="1.0" encoding="utf-8" ?><gost:application xmlns:gost="urn://fgis-arshin.gost.ru/' \
           'module-verifications/import/2020-06-19">' + final + '</gost:application>'
 
-    return doc
+    return doc, len(output)
 
 
-if __name__ == "__main__":
-    # make_xml()
+# if __name__ == "__main__":
+    # print(make_xml())
     # to_xml()
-    processing('test.xlsx', 11111)
+    # processing('test.xlsx', 11111)
