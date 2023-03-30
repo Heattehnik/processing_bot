@@ -92,8 +92,10 @@ def get_standart_fif(data):
 def get_mp(ngr):
     cursor.execute(f'SELECT mp FROM si_types WHERE ngr = "{ngr}"')
     res = cursor.fetchone()
-    return res[0]
-
+    if type(res) == tuple:
+        return res[0]
+    else:
+        return 0
 
 def processing(file, user_id):
     try:
