@@ -20,10 +20,10 @@ def ngr_check(ngr: str) -> bool:
 
 
 def insert_data(data: object, user_id: int) -> bool:
-    cursor.execute(f"SELECT si_number FROM test_uploaded_data WHERE si_number = '{data.si_number}'")
+    cursor.execute(f"SELECT si_number FROM uploaded_data WHERE si_number = '{data.si_number}'")
     result = cursor.fetchone()
     if not result:
-        cursor.execute('INSERT INTO test_uploaded_data (act_num, ngr, si_type, si_number, owner,'
+        cursor.execute('INSERT INTO uploaded_data (act_num, ngr, si_type, si_number, owner,'
                        'address, readings, water_temp, verification_date, valid_date, air_temp, humidity,'
                        'atm_pressure, qmin, qmax, intern, standart, phone, processing_date, user_id, valid_for, '
                        'conclusion, verifier_surname, verifier_name, verifier_patronymic, xml, standart_fif, mp) '
@@ -40,7 +40,7 @@ def insert_data(data: object, user_id: int) -> bool:
 
 
 def choose_date(date):
-    cursor.execute(f"SELECT * FROM test_uploaded_data WHERE verification_date LIKE '%{date}%'")
+    cursor.execute(f"SELECT * FROM uploaded_data WHERE verification_date LIKE '%{date}%'")
     result = cursor.fetchall()
     return result
 
@@ -221,9 +221,9 @@ def make_file(date):
 
 
 def to_xml():
-    cursor.execute('SELECT * FROM test_uploaded_data WHERE xml = "0"')
+    cursor.execute('SELECT * FROM uploaded_data WHERE xml = "0"')
     result = cursor.fetchall()
-    cursor.execute('UPDATE test_uploaded_data SET xml = "1" WHERE xml = "0"')
+    cursor.execute('UPDATE uploaded_data SET xml = "1" WHERE xml = "0"')
     connect.commit()
     return result
 
