@@ -80,8 +80,8 @@ def is_allowed_id(user_id: int):
         return 0
 
 def get_standart_fif(data):
-    cursor.execute(f'SELECT standart_fif FROM standarts WHERE standart_manufacture_num = "{data.standart}" AND '
-                   f'standart_valid_until > "{data.verification_date}" ')
+    cursor.execute(f'SELECT standart_fif FROM standarts WHERE standart_manufacture_num LIKE "{data.standart}" AND '
+                   f'standart_valid_until >= "{data.verification_date}" ')
     res = cursor.fetchone()
     if type(res) == tuple:
         return res[0]
@@ -160,20 +160,24 @@ def processing(file, user_id):
             if not verifier:
                 error = 'УКАЗАННЫЙ ПОВЕРИТЕЛЬ НЕ НАЙДЕН'
                 break
-            if not isinstance(data.verification_date, datetime.datetime) or data.verification_date >= data.valid_date:
-                error = 'НЕКОРРЕКТНАЯ ДАТА'
+            if not isinstance(data.verification_date, datetime.datetime):
+                error = 'НЕКОРРЕКТНАЯ ДАТА ПОВЕРКИ'
+                break
+            if data.valid_date is not None and data.verification_date >= data.valid_date:
+                error = 'НЕКОРРЕКТНАЯ ДАТА ДЕЙСТВИТЕЛЬНО ДО'
                 break
             if not isinstance(data.valid_date, datetime.datetime) and data.valid_date is not None:
-                error = 'НЕКОРРЕКТНАЯ ДАТА'
+                error = 'НЕКОРРЕКТНАЯ ДАТА ДЕЙСТВИТЕЛЬНО ДО'
                 break
             if not data.standart_fif:
                 error = 'ЭТАЛОН НЕ НАЙДЕН'
                 break
             insert_data(data, user_id)
             i += 1
-    except:
-        pass
-    return error, i
+        return error, i
+    except Exception as e:
+        return e, i
+
 
 
 def make_file(date):
