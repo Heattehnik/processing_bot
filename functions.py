@@ -255,7 +255,7 @@ def make_xml():
         singCipher.text = "ГШИ"
 
         miOwner = xml.SubElement(result, "gost:miOwner")
-        miOwner.text = f'{data[i][5]}'
+        miOwner.text = '-'
 
         vrfDate = xml.SubElement(result, "gost:vrfDate")
         input_date = datetime.datetime.strptime(data[i][9], '%Y-%m-%d %H:%M:%S')
