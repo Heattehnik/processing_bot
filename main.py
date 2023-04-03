@@ -35,9 +35,7 @@ def processing_file(message):
         bot.send_message(message.chat.id, f'Ошибка в строке {check[1] - 1} {check[0]}')
     else:
         bot.send_message(message.chat.id, 'Обработка завершена!')
-        xml_ = make_xml()
-        print(xml_)
-
+        xml_ = make_xml(message.chat.id)
         with open(f'{message.document.file_name[:-5]} ---{xml_[1]}.xml', 'a+') as file:
             file.writelines(xml_[0])
             file.seek(0)

@@ -222,16 +222,16 @@ def make_file(date):
         pass
 
 
-def to_xml():
-    cursor.execute('SELECT * FROM uploaded_data WHERE xml = "0"')
+def to_xml(user_id):
+    cursor.execute(f'SELECT * FROM uploaded_data WHERE xml = "0" AND user_id = "{user_id}"')
     result = cursor.fetchall()
-    cursor.execute('UPDATE uploaded_data SET xml = "1" WHERE xml = "0"')
+    cursor.execute(f'UPDATE uploaded_data SET xml = "1" WHERE xml = "0" AND user_id = "{user_id}"')
     connect.commit()
     return result
 
 
-def make_xml():
-    data = to_xml()
+def make_xml(user_id):
+    data = to_xml(user_id)
     i = 0
     output = []
 
