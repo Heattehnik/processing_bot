@@ -18,6 +18,20 @@ def ngr_check(ngr: str) -> bool:
     else:
         return False
 
+def from_db_for_protocol():
+    cursor.execute(f"SELECT * FROM uploaded_data WHERE protocol = 2")
+    result = cursor.fetchall()
+    return result
+
+def get_additional_standarts(verifier):
+    cursor.execute(f"SELECT * FROM real_verifiers WHERE verifier LIKE '%{verifier}%'")
+    result = cursor.fetchone()
+    return result
+
+def get_standart_type(standart_fif):
+    cursor.execute(f"SELECT standart_modification FROM standarts WHERE standart_fif LIKE '%{standart_fif}%'")
+    result = cursor.fetchone()
+    return result
 
 def insert_data(data: object, user_id: int) -> bool:
     cursor.execute(f"SELECT si_number FROM uploaded_data WHERE si_number = '{data.si_number}'")
