@@ -13,7 +13,7 @@ def get_data_for_protocol():
             current_protocol.ngr = protocol[2]
             current_protocol.mp = protocol[28]
             current_protocol.conclusion = protocol[12]
-            current_protocol.verification_date = datetime.datetime.strptime(protocol[9], '%Y-%m-%d %H:%M:%S')\
+            current_protocol.verification_date = datetime.datetime.strptime(protocol[9], '%Y-%m-%d %H:%M:%S') \
                 .strftime('%d.%m.%Y')
             current_protocol.verifier = f'{protocol[24]} {protocol[25]} {protocol[26]}'
             additional_standarts = get_additional_standarts(current_protocol.verifier)
@@ -31,7 +31,7 @@ def get_data_for_protocol():
             current_protocol.owner = protocol[5]
             current_protocol.si_number = protocol[4]
             if protocol[10]:
-                current_protocol.valid_until = datetime.datetime.strptime(protocol[10], '%Y-%m-%d %H:%M:%S')\
+                current_protocol.valid_until = datetime.datetime.strptime(protocol[10], '%Y-%m-%d %H:%M:%S') \
                     .strftime('%d.%m.%Y')
             current_protocol.readings_start = float(protocol[7])
             current_protocol.water_temp_start = protocol[8]
@@ -49,9 +49,26 @@ def protocol_data_calc(protocols):
         protocol.build_protocol()
 
 
-
 if __name__ == '__main__':
-   output = get_data_for_protocol()
-   protocol_data_calc(output)
-
-
+    # output = get_data_for_protocol()
+    # protocol_data_calc(output)
+    verifiers = ['МИНГАЛЕВ', 'КОЛОСКОВ', 'МАСКАЕВ', 'БЫКОВ', 'ТОЛСТОШЕЕВ', 'НОВИКОВ', 'СМОЛЯКОВ', 'КАЙГОРОДОВ',
+                 'КУТУЗОВ', 'КАНЗЕБА', 'ГРИГОРЬЕВ', 'ЛЕГЕНЬКОВ', 'ГАЛДАНОВ', 'ГАЛИМУЛЛИН', 'ЗЛОБИН', 'ПУШАНКИН',
+                 'КАШПЕРКО', 'ТЕРЕНТЬЕВ', 'ПОНОМАРЁВ', 'ДЕМИДОВ', 'МИКУШИН', 'ПЫЖЬЯНОВ', 'БЕЗИК', 'ГЕРМАНЧУК',
+                 'ГУСЕВ', 'МАКАРЦЕВ', 'БУЛЫГИН', 'ЛОГИНОВ', 'МАЦЕРА', 'МУЛЛАГАЛИЕВ', 'ШАКИРОВ', 'НАЗАРОВ', 'СОКОЛОВ',
+                 'АВДЕЕНКО', 'СТАТКЕВИЧ', 'ЗИНЧЕНКО', 'ЗОЛОТАРЁВ', 'КВАШНИН', 'КРИВОРОТ', 'НИКОНЕНКО', 'РЯБЦОВ',
+                 'ФОМИЧЕВ', 'ЗАЕВ', 'АВИЛКИН', 'ВЕСНИН', 'ЗОБНИН', 'КОМАРСКИХ', 'ЛОБАНОВ', 'ЛОГАЧЕВ', 'КОНСТАНТИНОВ',
+                 'СКУЛКИН', 'МИННИКАЕВ', 'ЯДРЫШНИКОВ', 'УГРЮМОВ', 'РОДИОНОВ', 'КУТЛУЗАМАНОВ', 'ИЗМАГИЛОВ', 'ЦЕЛЬМ',
+                 'ЛАМБИН', 'МЕРЗЛЯКОВ', 'ЦАРЕГОРОДЦЕВ', 'ПЕРЕЦ', 'НАЗЫРОВ', 'НАБОКИН', 'ХРАМЦОВ', 'ГАЛНЫКИН', 'ЯКОВЛЕВ',
+                 'СКОРОБОГАТОВ', 'ЕФРЕМОВ', 'САЛАГАЕВ', 'КАРПОВ', 'ЧИЛЮМОВ', 'МУХАМАДЕЕВ', 'УЙМАНОВ', 'ДЕРГАЧЕВ',
+                 'ПЛЮСНИН']
+    print(verifiers)
+    verifiers.sort()
+    print(len(verifiers))
+    print(verifiers)
+    number = 1
+    verf_dict = {}
+    for verifier in verifiers:
+        verf_dict[number] = verifier
+        number += 1
+    print(verf_dict)
