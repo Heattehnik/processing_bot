@@ -1,7 +1,7 @@
 from env import BOT_TOKEN
 import telebot
 from functions import processing, make_file, is_allowed_id, user_reg, user_delete, make_xml
-from protocol import get_data_for_protocol, make_protocols
+from protocol import get_data_for_protocol, make_protocols, make_zip
 import os
 
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -50,9 +50,13 @@ def start_protocol(message):
         bot.send_message(message.chat.id, 'Извините! Вы не зарегестрированы!')
     else:
         bot.send_message(message.chat.id, "Формирование протоколов начато...")
-        protocol_list = get_data_for_protocol()
+        protocol_list = get_data_for_protocol(message.chat.id)
         result = make_protocols(protocol_list)
-        bot.send_message(message.chat.id, f"Сформировано {result} протоколов")
+        bot.send_message(message.chat.id, f"Сформировано {result} протоколов. Подготавливается файл к отправке. "
+                                          f"Подождите...")
+        zip_file = make_zip()
+        bot.send_document(message.chat.id, zip_file, visible_file_name='protocols.zip')
+        os.remove(f'protocols.zip')
 
 
 bot.polling()

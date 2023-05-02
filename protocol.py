@@ -2,10 +2,13 @@ from functions import from_db_for_protocol, get_additional_standarts, get_standa
 from classes import Protocol
 from env import INTERNS
 import datetime
+from shutil import make_archive, rmtree
+import os
+from pathlib import Path
 
 
-def get_data_for_protocol():
-    source_data = from_db_for_protocol()
+def get_data_for_protocol(user_id):
+    source_data = from_db_for_protocol(user_id)
     protocol_list = []
 
     if source_data:
@@ -56,6 +59,19 @@ def make_protocols(protocols):
     return count
 
 
+def make_zip():
+    path = Path(__file__)
+    print(path)
+    archive_name = 'protocols'
+    root_dir = os.curdir + '/protocols/'
+    make_archive(archive_name, 'zip', root_dir)
+    with open('protocols.zip', 'rb') as misc:
+        zip_file = misc.read()
+    rmtree(root_dir)
+    return zip_file
+
+
+
 if __name__ == '__main__':
-    output = get_data_for_protocol()
+    output = get_data_for_protocol(342519256)
     make_protocols(output)
