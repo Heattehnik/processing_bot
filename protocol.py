@@ -24,8 +24,8 @@ def get_data_for_protocol():
             current_protocol.termometr = additional_standarts[22]
             current_protocol.si_type = protocol[3]
             current_protocol.standart_num = protocol[19]
-            current_protocol.qmax = float(protocol[17])
-            current_protocol.qmin = float(protocol[16])
+            current_protocol.qmax = float(str(protocol[17]).replace(',', '.').replace(' ', ''))
+            current_protocol.qmin = float(str(protocol[16]).replace(',', '.').replace(' ', ''))
             current_protocol.atm_pressure = protocol[15]
             current_protocol.humidity = protocol[14]
             current_protocol.air_temp = protocol[13]
@@ -35,7 +35,7 @@ def get_data_for_protocol():
             if protocol[10]:
                 current_protocol.valid_until = datetime.datetime.strptime(protocol[10], '%Y-%m-%d %H:%M:%S') \
                     .strftime('%d.%m.%Y')
-            current_protocol.readings_start = float(protocol[7])
+            current_protocol.readings_start = float(protocol[7].replace(',', '.').replace(' ', ''))
             current_protocol.water_temp_start = protocol[8]
             current_protocol.standart_fif = protocol[20]
             current_protocol.standart = get_standart_type(current_protocol.standart_fif)

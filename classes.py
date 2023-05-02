@@ -137,18 +137,18 @@ class Protocol:
                 self.readings_end = round(self.readings_start + (self.vminsi + self.vtransitionalsi) / 1000, 3)
 
     def flow_rates_gost(self):
-        self.readings_start = self.readings_start * 1000
-        self.qmax = 1.5 - round(random.uniform(0, 0.15), 2)
+        self.readings_start = round(self.readings_start * 1000, 2)
+        self.qmax = round(1.5 - random.uniform(0, 0.15), 2)
         self.vmaxst = 0.02 * 1000
         self.pmax = round(random.uniform(-2, 2), 2)
         self.vmaxsi = self.vmaxst + (self.vmaxst * (self.pmax / 100))
         self.readings_middle_start = round(self.readings_start + self.vmaxsi, 2)
-        self.qtransitional = 0.15 + round(random.uniform(0, 0.015), 3)
+        self.qtransitional = round(0.15 + random.uniform(0, 0.015), 3)
         self.vtransitionalst = 0.005 * 1000
         self.ptransitional = round(random.uniform(-2, 2), 2)
         self.vtransitionalsi = self.vtransitionalst + (self.vtransitionalst * (self.ptransitional / 100))
         self.readings_middle_end = round(self.readings_middle_start + self.vtransitionalsi, 2)
-        self.qmin = 0.03 + round(random.uniform(0, 0.003), 3)
+        self.qmin = round(0.03 + random.uniform(0, 0.003), 3)
         self.vminstd = 0.0025 * 1000
         self.pmin = round(random.uniform(-5, 5), 2)
         self.vminsi = self.vminstd + (self.vminstd * (self.pmin / 100))

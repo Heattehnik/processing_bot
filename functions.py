@@ -20,7 +20,7 @@ def ngr_check(ngr: str) -> bool:
 
 
 def from_db_for_protocol():
-    cursor.execute(f"SELECT * FROM uploaded_data WHERE protocol = 2")
+    cursor.execute(f"SELECT * FROM uploaded_data WHERE protocol = 0")
     result = cursor.fetchall()
     return result
 
@@ -34,7 +34,7 @@ def get_additional_standarts(verifier):
 def get_standart_type(standart_fif):
     cursor.execute(f"SELECT standart_modification FROM standarts WHERE standart_fif LIKE '%{standart_fif}%'")
     result = cursor.fetchone()
-    return result
+    return result[0]
 
 
 def insert_data(data: object, user_id: int) -> bool:
@@ -336,7 +336,4 @@ def make_xml(user_id):
     return doc, len(output)
 
 
-if __name__ == "__main__":
-    # print(make_xml())
-    # to_xml()
-    print(processing('test.xlsx', 11111))
+# if __name__ == "__main__":
