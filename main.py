@@ -1,7 +1,7 @@
 from env import BOT_TOKEN
 import telebot
 from functions import processing, make_file, is_allowed_id, user_reg, user_delete, make_xml
-from protocol import get_data_for_protocol, protocol_data_calc
+from protocol import get_data_for_protocol, make_protocols
 import os
 
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -51,7 +51,7 @@ def start_protocol(message):
     else:
         bot.send_message(message.chat.id, "Формирование протоколов начато...")
         protocol_list = get_data_for_protocol()
-        result = protocol_data_calc(protocol_list)
+        result = make_protocols(protocol_list)
         bot.send_message(message.chat.id, f"Сформировано {result} протоколов")
 
 

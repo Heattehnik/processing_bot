@@ -50,7 +50,8 @@ class Protocol:
         self.humidity = None
         self.atm_pressure = None
         self.readings_start = None
-        self.readings_middle = None
+        self.readings_middle_start = None
+        self.readings_middle_end = None
         self.readings_end = None
         self.standart_num = None
         self.termometr = None
@@ -135,53 +136,99 @@ class Protocol:
                 self.vmaxst = ''
                 self.readings_end = round(self.readings_start + (self.vminsi + self.vtransitionalsi) / 1000, 3)
 
-    def build_protocol(self):
-        context = {
-            'protocol_number': self.protocol_number,
-            'address': self.address,
-            'si_type': self.si_type,
-            'ngr': self.ngr,
-            'si_number': self.si_number,
-            'owner': self.owner,
-            'verification_date': self.verification_date,
-            'mp': self.mp,
-            'air_temp': self.air_temp,
-            'water_temp_start': self.water_temp_start,
-            'water_temp_end': self.water_temp_end,
-            'humidity': self.humidity,
-            'atm_pressure': self.atm_pressure,
-            'readings_start': self.readings_start,
-            'readings_end': self.readings_end,
-            'standart': self.standart,
-            'termometr': self.termometr,
-            'gigrometr': self.gigrometr,
-            'stopwatch': self.stopwatch,
-            'barometr': self.barometr,
-            'qmin': self.qmin,
-            'vminsi': self.vminsi,
-            'vminst': self.vminstd,
-            'pmin': self.pmin,
-            'qtransitional': self.qtransitional,
-            'vtransitionalsi': self.vtransitionalsi,
-            'vtransitionalst': self.vtransitionalst,
-            'ptransitional': self.ptransitional,
-            'qmax': self.qmax,
-            'vmaxsi': self.vmaxsi,
-            'vmaxst': self.vmaxst,
-            'pmax': self.pmax,
-            'verifier': self.verifier,
-            'conclusion': self.conclusion,
-            'standart_num': self.standart_num,
+    def flow_rates_gost(self):
+        self.readings_start = self.readings_start * 1000
+        self.qmax = 1.5 - round(random.uniform(0, 0.15), 2)
+        self.vmaxst = 0.02 * 1000
+        self.pmax = round(random.uniform(-2, 2), 2)
+        self.vmaxsi = self.vmaxst + (self.vmaxst * (self.pmax / 100))
+        self.readings_middle_start = round(self.readings_start + self.vmaxsi, 2)
+        self.qtransitional = 0.15 + round(random.uniform(0, 0.015), 3)
+        self.vtransitionalst = 0.005 * 1000
+        self.ptransitional = round(random.uniform(-2, 2), 2)
+        self.vtransitionalsi = self.vtransitionalst + (self.vtransitionalst * (self.ptransitional / 100))
+        self.readings_middle_end = round(self.readings_middle_start + self.vtransitionalsi, 2)
+        self.qmin = 0.03 + round(random.uniform(0, 0.003), 3)
+        self.vminstd = 0.0025 * 1000
+        self.pmin = round(random.uniform(-5, 5), 2)
+        self.vminsi = self.vminstd + (self.vminstd * (self.pmin / 100))
+        self.readings_end = round(self.readings_middle_end + self.vminsi, 2)
+        if not self.valid_until:
+            self.pmax = round(random.uniform(-5, 5), 2)
+            self.vmaxsi = self.vmaxst + (self.vmaxst * (self.pmax / 100))
+            self.readings_middle_start = round(self.readings_start + self.vmaxsi, 2)
+            if 2 >= self.pmax >= 0 or 0 >= self.pmax >= -2:
+                    self.ptransitional = round(random.uniform(-5, 5), 2)
+                    self.vtransitionalsi = self.vtransitionalst + (self.vtransitionalst * (self.ptransitional / 100))
+                    self.readings_middle_end = round(self.readings_middle_start + self.vtransitionalsi, 2)
+                    if 2 >= self.ptransitional >= 0 or 0 >= self.ptransitional >= -2:
+                        self.pmin = round(random.uniform(5, 10), 2)
+                        self.vminsi = self.vminstd + (self.vminstd * (self.pmin / 100))
+                        self.readings_end = round(self.readings_middle_end + self.vminsi, 2)
+                    else:
+                        self.qmin = ''
+                        self.readings_end = ''
+                        self.vminstd = ''
+                        self.pmin = ''
+            else:
+                self.qtransitional = ''
+                self.readings_middle_end = ''
+                self.vtransitionalst = ''
+                self.ptransitional = ''
+                self.qmin = ''
+                self.readings_end = ''
+                self.vminstd = ''
+                self.pmin = ''
 
-        }
-        if not os.path.exists('protocols'):
-            os.mkdir('protocols')
-        doc = DocxTemplate('MI1592-2015.docx')
-        if self.mp == 'ГОСТ 8.156-83':
-            doc = DocxTemplate('GOST 8.156-83.docx')
-        doc.render(context)
-        doc.save(f"protocols/{self.verification_date}-"
-                 f"{self.protocol_number.replace('/', '.')}-{self.conclusion}-"
-                 f"{self.si_type.replace('/', '.')}-{self.si_number.replace('/', '.')}-"
-                 f"{self.address.replace('/', '.')}.docx")
+    def build_protocol(self):
+            context = {
+                'protocol_number': self.protocol_number,
+                'address': self.address,
+                'si_type': self.si_type,
+                'ngr': self.ngr,
+                'si_number': self.si_number,
+                'owner': self.owner,
+                'verification_date': self.verification_date,
+                'mp': self.mp,
+                'air_temp': self.air_temp,
+                'water_temp_start': self.water_temp_start,
+                'water_temp_end': self.water_temp_end,
+                'humidity': self.humidity,
+                'atm_pressure': self.atm_pressure,
+                'readings_start': self.readings_start,
+                'readings_end': self.readings_end,
+                'readings_middle_start': self.readings_middle_start,
+                'readings_middle_end': self.readings_middle_end,
+                'standart': self.standart,
+                'termometr': self.termometr,
+                'gigrometr': self.gigrometr,
+                'stopwatch': self.stopwatch,
+                'barometr': self.barometr,
+                'qmin': self.qmin,
+                'vminsi': self.vminsi,
+                'vminst': self.vminstd,
+                'pmin': self.pmin,
+                'qtransitional': self.qtransitional,
+                'vtransitionalsi': self.vtransitionalsi,
+                'vtransitionalst': self.vtransitionalst,
+                'ptransitional': self.ptransitional,
+                'qmax': self.qmax,
+                'vmaxsi': self.vmaxsi,
+                'vmaxst': self.vmaxst,
+                'pmax': self.pmax,
+                'verifier': self.verifier,
+                'conclusion': self.conclusion,
+                'standart_num': self.standart_num,
+
+            }
+            if not os.path.exists('protocols'):
+                os.mkdir('protocols')
+            doc = DocxTemplate('MI1592-2015.docx')
+            if self.mp == 'ГОСТ 8.156-83':
+                doc = DocxTemplate('GOST 8.156-83.docx')
+            doc.render(context)
+            doc.save(f"protocols/{self.verification_date}-"
+                     f"{self.protocol_number.replace('/', '.')}-{self.conclusion}-"
+                     f"{self.si_type.replace('/', '.')}-{self.si_number.replace('/', '.')}-"
+                     f"{self.address.replace('/', '.')}.docx")
 

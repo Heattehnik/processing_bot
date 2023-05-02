@@ -1,11 +1,13 @@
 from functions import from_db_for_protocol, get_additional_standarts, get_standart_type
 from classes import Protocol
+from env import INTERNS
 import datetime
 
 
 def get_data_for_protocol():
     source_data = from_db_for_protocol()
     protocol_list = []
+
     if source_data:
         for protocol in source_data:
 
@@ -37,14 +39,16 @@ def get_data_for_protocol():
             current_protocol.water_temp_start = protocol[8]
             current_protocol.standart_fif = protocol[20]
             current_protocol.standart = get_standart_type(current_protocol.standart_fif)
-            # current_protocol.protocol_number = f'{current_protocol.verification_date[]}'
+            current_protocol.protocol_number = f"{INTERNS.get(protocol[18])}.{datetime.datetime.strptime(protocol[9], '%Y-%m-%d %H:%M:%S').strftime('%y.%m')}.{current_protocol.si_number}"
             current_protocol.set_temp()
             current_protocol.set_flow_rates()
+            if current_protocol.mp == 'ГОСТ 8.156-83':
+                current_protocol.flow_rates_gost()
             protocol_list.append(current_protocol)
     return protocol_list
 
 
-def protocol_data_calc(protocols):
+def make_protocols(protocols):
     count = 0
     for protocol in protocols:
         protocol.build_protocol()
@@ -54,4 +58,4 @@ def protocol_data_calc(protocols):
 
 if __name__ == '__main__':
     output = get_data_for_protocol()
-    protocol_data_calc(output)
+    make_protocols(output)
