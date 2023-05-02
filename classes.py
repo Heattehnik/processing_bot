@@ -1,5 +1,7 @@
 import random
 from docxtpl import DocxTemplate
+import os
+
 
 class Data:
     def __init__(self):
@@ -107,7 +109,8 @@ class Protocol:
                 self.pmax = round(random.uniform(-1.9, 0), 2)
             self.vmaxst = round(float(self.qmax) / 3600 * 1000 * 120, 2)
             self.vmaxsi = round(self.vmaxst + (self.vmaxst * (self.pmax / 100)), 2)
-            self.readings_end = round(self.readings_start + (self.vminsi + self.vtransitionalsi + self.vmaxsi) / 1000, 3)
+            self.readings_end = round(self.readings_start + (self.vminsi + self.vtransitionalsi + self.vmaxsi) / 1000,
+                                      3)
         else:
             if self.pmin > 0:
                 self.ptransitional = round(random.uniform(0, 6), 2)
@@ -117,18 +120,14 @@ class Protocol:
             self.vtransitionalsi = round(self.vtransitionalst + (self.vtransitionalst * (self.ptransitional / 100)), 2)
 
             if -2 < self.ptransitional < 0 or 0 < self.ptransitional < 2:
+                self.vmaxst = round(float(self.qmax) / 3600 * 1000 * 120, 2)
                 if self.ptransitional > 0:
                     self.pmax = round(random.uniform(2, 5), 2)
-                    self.vmaxst = round(float(self.qmax) / 3600 * 1000 * 120, 2)
-                    self.vmaxsi = round(self.vmaxst + (self.vmaxst * (self.pmax / 100)), 2)
-                    self.readings_end = round(self.readings_start + (self.vminsi + self.vtransitionalsi +
-                                                                     self.vmaxsi) / 1000, 3)
                 else:
                     self.pmax = round(random.uniform(-5, -2), 2)
-                    self.vmaxst = round(float(self.qmax) / 3600 * 1000 * 120, 2)
-                    self.vmaxsi = round(self.vmaxst + (self.vmaxst * (self.pmax / 100)), 2)
-                    self.readings_end = round(self.readings_start + (self.vminsi + self.vtransitionalsi
-                                                                     + self.vmaxsi) / 1000, 3)
+                self.vmaxsi = round(self.vmaxst + (self.vmaxst * (self.pmax / 100)), 2)
+                self.readings_end = round(
+                    self.readings_start + (self.vminsi + self.vtransitionalsi + self.vmaxsi) / 1000, 3)
             else:
                 self.qmax = ''
                 self.pmax = ''
@@ -175,13 +174,14 @@ class Protocol:
             'standart_num': self.standart_num,
 
         }
-        if self.mp == 'МИ 1592-2015':
+        if not os.path.exists('protocols'):
+            os.mkdir('protocols')
+        doc = DocxTemplate('MI1592-2015.docx')
+        if self.mp == 'ГОСТ 8.156-83':
+            doc = DocxTemplate('GOST 8.156-83.docx')
+        doc.render(context)
+        doc.save(f"protocols/{self.verification_date}-"
+                 f"{self.protocol_number.replace('/', '.')}-{self.conclusion}-"
+                 f"{self.si_type.replace('/', '.')}-{self.si_number.replace('/', '.')}-"
+                 f"{self.address.replace('/', '.')}.docx")
 
-            doc = DocxTemplate('MI1592-2015.docx')
-
-            doc.render(context)
-
-            doc.save(f"protocols/{self.verification_date}-"
-                                 f"{self.protocol_number.replace('/', '.')}-{self.conclusion}-"
-                                 f"{self.si_type.replace('/', '.')}-{self.si_number.replace('/', '.')}-"
-                                 f"{self.address.replace('/', '.')}.docx")

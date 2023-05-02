@@ -13,7 +13,7 @@ def get_data_for_protocol():
             current_protocol.ngr = protocol[2]
             current_protocol.mp = protocol[28]
             current_protocol.conclusion = protocol[12]
-            current_protocol.verification_date = datetime.datetime.strptime(protocol[9], '%Y-%m-%d %H:%M:%S')\
+            current_protocol.verification_date = datetime.datetime.strptime(protocol[9], '%Y-%m-%d %H:%M:%S') \
                 .strftime('%d.%m.%Y')
             current_protocol.verifier = f'{protocol[24]} {protocol[25]} {protocol[26]}'
             additional_standarts = get_additional_standarts(current_protocol.verifier)
@@ -31,27 +31,27 @@ def get_data_for_protocol():
             current_protocol.owner = protocol[5]
             current_protocol.si_number = protocol[4]
             if protocol[10]:
-                current_protocol.valid_until = datetime.datetime.strptime(protocol[10], '%Y-%m-%d %H:%M:%S')\
+                current_protocol.valid_until = datetime.datetime.strptime(protocol[10], '%Y-%m-%d %H:%M:%S') \
                     .strftime('%d.%m.%Y')
             current_protocol.readings_start = float(protocol[7])
             current_protocol.water_temp_start = protocol[8]
             current_protocol.standart_fif = protocol[20]
             current_protocol.standart = get_standart_type(current_protocol.standart_fif)
+            # current_protocol.protocol_number = f'{current_protocol.verification_date[]}'
             current_protocol.set_temp()
             current_protocol.set_flow_rates()
             protocol_list.append(current_protocol)
-            # print(str(current_protocol))
     return protocol_list
 
 
 def protocol_data_calc(protocols):
+    count = 0
     for protocol in protocols:
         protocol.build_protocol()
-
+        count += 1
+    return count
 
 
 if __name__ == '__main__':
-   output = get_data_for_protocol()
-   protocol_data_calc(output)
-
-
+    output = get_data_for_protocol()
+    protocol_data_calc(output)

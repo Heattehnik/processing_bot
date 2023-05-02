@@ -1,6 +1,7 @@
 from env import BOT_TOKEN
 import telebot
 from functions import processing, make_file, is_allowed_id, user_reg, user_delete, make_xml
+from protocol import get_data_for_protocol, protocol_data_calc
 import os
 
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -43,24 +44,15 @@ def processing_file(message):
         os.remove(f'{message.document.file_name[:-5]} ---{xml_[1]}.xml')
 
 
-# @bot.message_handler(commands=['download'])
-# def ask_date(message):
-#     if is_allowed_id(message.from_user.id) != message.from_user.id:
-#         bot.send_message(message.chat.id, 'Извините! Вы не зарегестрированы!')
-#     else:
-#         bot.send_message(message.chat.id, "Введите дату поверки для выгрузки.")
-#         bot.register_next_step_handler(message, file_preparing)
-#
-#
-# def file_preparing(message):
-#     date = message.text
-#     splited_date = date.split('.')
-#     splited_date.reverse()
-#     joined_date = '-'.join(splited_date)
-#     file_name = make_file(joined_date)
-#     with open(file_name, 'rb') as file:
-#         bot.send_document(message.chat.id, file)
-#     os.remove(file_name)
+@bot.message_handler(commands=['protocol'])
+def start_protocol(message):
+    if is_allowed_id(message.from_user.id) != message.from_user.id:
+        bot.send_message(message.chat.id, 'Извините! Вы не зарегестрированы!')
+    else:
+        bot.send_message(message.chat.id, "Формирование протоколов начато...")
+        protocol_list = get_data_for_protocol()
+        result = protocol_data_calc(protocol_list)
+        bot.send_message(message.chat.id, f"Сформировано {result} протоколов")
 
 
 bot.polling()
