@@ -32,7 +32,7 @@ def get_data_for_protocol(user_id):
             current_protocol.atm_pressure = protocol[15]
             current_protocol.humidity = protocol[14]
             current_protocol.air_temp = protocol[13]
-            current_protocol.address = protocol[6]
+            current_protocol.address = protocol[6].replace('"', '').replace('\\', '/')
             current_protocol.owner = protocol[5]
             current_protocol.si_number = protocol[4]
             if protocol[10]:

@@ -25,6 +25,11 @@ def from_db_for_protocol(user_id):
     return result
 
 
+def set_protocol_to_1(user_id):
+    cursor.execute(f'UPDATE uploaded_data SET protocol = "1" WHERE protocol = "0" AND user_id = "{user_id}"')
+    connect.commit()
+
+
 def get_additional_standarts(verifier):
     cursor.execute(f"SELECT * FROM real_verifiers WHERE verifier LIKE '%{verifier}%'")
     result = cursor.fetchone()
@@ -335,5 +340,17 @@ def make_xml(user_id):
 
     return doc, len(output)
 
+def make_mp():
+    for i in range(1, 30000):
+        cursor.execute(f'SELECT * FROM uploaded_data WHERE mp = "0" AND id = "{i}"')
+        result = cursor.fetchone()
+        print(i)
+        if result:
+            mp = get_mp(result[2])
+            cursor.execute(f'UPDATE uploaded_data SET mp = "{mp}" WHERE mp = "0" AND id = "{i}"')
+            connect.commit()
+    return result
+
 
 # if __name__ == "__main__":
+#     make_mp()
