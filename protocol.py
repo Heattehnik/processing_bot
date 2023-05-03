@@ -25,6 +25,7 @@ def get_data_for_protocol(user_id):
             current_protocol.gigrometr = additional_standarts[23]
             current_protocol.stopwatch = additional_standarts[24]
             current_protocol.termometr = additional_standarts[22]
+            current_protocol.barometr = additional_standarts[25]
             current_protocol.si_type = protocol[3]
             current_protocol.standart_num = protocol[19]
             current_protocol.qmax = float(str(protocol[17]).replace(',', '.').replace(' ', ''))
