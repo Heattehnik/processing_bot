@@ -49,15 +49,18 @@ def start_protocol(message):
     if is_allowed_id(message.from_user.id) != message.from_user.id:
         bot.send_message(message.chat.id, 'Извините! Вы не зарегестрированы!')
     else:
-        bot.send_message(message.chat.id, "Формирование протоколов начато...")
-        protocol_list = get_data_for_protocol(message.chat.id)
-        result = make_protocols(protocol_list)
-        bot.send_message(message.chat.id, f"Сформировано {result} протоколов. Подготавливается файл к отправке. "
-                                          f"Подождите...")
-        zip_file = make_zip()
-        set_protocol_to_1(message.chat.id)
-        bot.send_document(message.chat.id, zip_file, visible_file_name='protocols.zip')
-        os.remove(f'protocols.zip')
+        try:
+            bot.send_message(message.chat.id, "Формирование протоколов начато...")
+            protocol_list = get_data_for_protocol(message.chat.id)
+            result = make_protocols(protocol_list)
+            bot.send_message(message.chat.id, f"Сформировано {result} протоколов. Подготавливается файл к отправке. "
+                                              f"Подождите...")
+            zip_file = make_zip()
+            set_protocol_to_1(message.chat.id)
+            bot.send_document(message.chat.id, zip_file, visible_file_name='protocols.zip')
+            os.remove(f'protocols.zip')
+        except Exception as e:
+            bot.send_message(message.chat.id, f"{e}")
 
 
 bot.polling()
