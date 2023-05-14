@@ -35,7 +35,8 @@ def processing_file(message):
     if check[2]:
         bot.send_message(message.chat.id, 'Внимание! Обнаружены ранее внесенные счетчики!')
         for item in check[2]:
-            bot.send_message(message.chat.id, f'Заводской номер: {item[0]}\n'
+            bot.send_message(message.chat.id, f'Строка {check[1] - 1}'
+                                              f'Заводской номер: {item[0]}\n'
                                               f'Дата поверки: {".".join(reversed(item[1][:10].split("-")))}\n'
                                               f'Поверитель: {item[2].title()}')
     if check[0]:
