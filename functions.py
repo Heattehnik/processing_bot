@@ -44,7 +44,7 @@ def get_standart_type(standart_fif):
 
 def insert_data(data: object, user_id: int) -> tuple:
     cursor.execute(f"SELECT si_number, verification_date, intern  FROM uploaded_data WHERE "
-                   f"si_number = '{data.si_number}' AND xml = 1")
+                   f"si_number = '{data.si_number}' AND xml = '1'")
     result = cursor.fetchone()
     if not result:
         cursor.execute('INSERT INTO uploaded_data (act_num, ngr, si_type, si_number, owner,'
