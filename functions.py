@@ -42,8 +42,8 @@ def get_standart_type(standart_fif):
     return result[0]
 
 
-def insert_data(data: object, user_id: int) -> bool:
-    cursor.execute(f"SELECT si_number FROM uploaded_data WHERE si_number = '{data.si_number}'")
+def insert_data(data: object, user_id: int) -> tuple:
+    cursor.execute(f"SELECT si_number, verification_date, intern  FROM uploaded_data WHERE si_number = '{data.si_number}'")
     result = cursor.fetchone()
     if not result:
         cursor.execute('INSERT INTO uploaded_data (act_num, ngr, si_type, si_number, owner,'
@@ -57,9 +57,8 @@ def insert_data(data: object, user_id: int) -> bool:
                         data.processing_date, user_id, data.valid_for, data.conclusion, data.verifier_surname,
                         data.verifier_name, data.verifier_patronymic, 0, data.standart_fif, data.mp))
         connect.commit()
-        return True
     else:
-        return False
+        return result
 
 
 def choose_date(date):
@@ -120,7 +119,9 @@ def get_mp(ngr):
     else:
         return 0
 
+
 def processing(file, user_id):
+    existing_counters = []
     try:
         wb_read = op.open(filename=file, data_only=True)
         sheet_read = wb_read['Лист1']
@@ -197,11 +198,14 @@ def processing(file, user_id):
             if not data.standart_fif:
                 error = 'ЭТАЛОН НЕ НАЙДЕН'
                 break
-            insert_data(data, user_id)
+            inserted = insert_data(data, user_id)
+            if inserted:
+                existing_counters.append(inserted)
+
             i += 1
-        return error, i
+        return error, i, existing_counters
     except Exception as e:
-        return e, i
+        return e, i, existing_counters
 
 
 

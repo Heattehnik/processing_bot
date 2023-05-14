@@ -32,9 +32,16 @@ def processing_file(message):
         file.write(downloaded_file)
     bot.send_message(message.chat.id, 'Ожидайте завершения обработки...')
     check = processing('temp.xlsx', message.from_user.id)
+    if check[2]:
+        bot.send_message(message.chat.id, 'Внимание! Обнаружены ранее внесенные счетчики!')
+        for item in check[2]:
+            bot.send_message(message.chat.id, f'Заводской номер: {item[0]}\n'
+                                              f'Дата поверки: {".".join(reversed(item[1][:10].split("-")))}\n'
+                                              f'Поверитель: {item[2].title()}')
     if check[0]:
         bot.send_message(message.chat.id, f'Ошибка в строке {check[1] - 1} {check[0]}')
     else:
+
         bot.send_message(message.chat.id, 'Обработка завершена!')
         xml_ = make_xml(message.chat.id)
         with open(f'{message.document.file_name[:-5]} ---{xml_[1]}.xml', 'a+') as file:
