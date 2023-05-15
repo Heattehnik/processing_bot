@@ -44,7 +44,7 @@ def get_standart_type(standart_fif):
 
 def insert_data(data: object, user_id: int) -> tuple:
     cursor.execute(f"SELECT si_number, verification_date, intern  FROM uploaded_data WHERE "
-                   f"si_number = '{data.si_number}' AND xml = '1'")
+                   f"si_number = '{data.si_number}'")
     result = cursor.fetchone()
     if not result:
         cursor.execute('INSERT INTO uploaded_data (act_num, ngr, si_type, si_number, owner,'
@@ -60,6 +60,13 @@ def insert_data(data: object, user_id: int) -> tuple:
         connect.commit()
     else:
         return result
+
+
+def get_existing_coiunters(data):
+    cursor.execute(f"SELECT si_number, verification_date, intern  FROM uploaded_data WHERE "
+                   f"si_number = '{data.si_number}'")
+    result = cursor.fetchone()
+    return result
 
 
 def choose_date(date):
@@ -199,7 +206,8 @@ def processing(file, user_id):
             if not data.standart_fif:
                 error = 'ЭТАЛОН НЕ НАЙДЕН'
                 break
-            inserted = insert_data(data, user_id)
+            insert_data(data, user_id)
+            inserted = get_existing_coiunters(data)
             if inserted:
                 existing_counters.append(inserted)
 
