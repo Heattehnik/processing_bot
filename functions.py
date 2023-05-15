@@ -64,7 +64,7 @@ def insert_data(data: object, user_id: int) -> tuple:
 
 def get_existing_coiunters(data):
     cursor.execute(f"SELECT si_number, verification_date, intern  FROM uploaded_data WHERE "
-                   f"si_number = '{data.si_number}'")
+                   f"si_number = '{data.si_number}' AND xml = '1'")
     result = cursor.fetchone()
     return result
 
