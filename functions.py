@@ -176,6 +176,9 @@ def processing(file, user_id):
             if data.verification_date < datetime.datetime(2022, 12, 31, 00, 00, 00):
                 error = '2022 ГОД'
                 break
+            if data.verification_date > datetime.datetime.now():
+                error = 'ДАТА ПОВЕРКИ В БУДУЩЕМ ПЕРИОДЕ'
+                break
             if not ngr:
                 error = 'РЕЕСТРОВЫЙ НОМЕР НЕ НАЙДЕН'
                 break
