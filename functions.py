@@ -144,6 +144,7 @@ def processing(file, user_id):
             data.owner = sheet_read[f'E{i}'].value
             data.address = sheet_read[f'F{i}'].value
             data.readings = sheet_read[f'G{i}'].value
+            print(type(data.readings))
             data.water_temp = sheet_read[f'H{i}'].value
             data.verification_date = sheet_read[f'I{i}'].value
             data.valid_date = sheet_read[f'J{i}'].value
@@ -201,7 +202,7 @@ def processing(file, user_id):
             if not verifier:
                 error = 'УКАЗАННЫЙ ПОВЕРИТЕЛЬ НЕ НАЙДЕН'
                 break
-            if not isinstance(data.readings, float) or not isinstance(data.readings, int):
+            if not isinstance(data.readings, float) and not isinstance(data.readings, int):
                 error = 'НЕКОРРЕКТНЫЕ ПОКАЗАНИЯ СЧЕТЧИКА'
                 break
             if not isinstance(data.verification_date, datetime.datetime):
