@@ -140,7 +140,7 @@ def processing(file, user_id):
             data.act_num = sheet_read[f'A{i}'].value
             data.ngr = str(sheet_read[f'B{i}'].value).replace(' ', '')
             data.si_type = sheet_read[f'C{i}'].value
-            data.si_number = sheet_read[f'D{i}'].value
+            data.si_number = str(sheet_read[f'D{i}'].value).strip()
             data.owner = sheet_read[f'E{i}'].value
             data.address = sheet_read[f'F{i}'].value
             data.readings = sheet_read[f'G{i}'].value
@@ -176,6 +176,9 @@ def processing(file, user_id):
             if data.verification_date < datetime.datetime(2022, 12, 31, 00, 00, 00):
                 error = '2022 ГОД'
                 break
+            if data.verification_date.day <= data.valid_date.day:
+                error = 'НЕКОРРЕКТНАЯ ДАТА ДЕЙСТВИТЕЛЬНО ДО'
+                break
             if data.verification_date > datetime.datetime.now():
                 error = 'ДАТА ПОВЕРКИ В БУДУЩЕМ ПЕРИОДЕ'
                 break
@@ -196,6 +199,9 @@ def processing(file, user_id):
                 break
             if not verifier:
                 error = 'УКАЗАННЫЙ ПОВЕРИТЕЛЬ НЕ НАЙДЕН'
+                break
+            if not isinstance(data.readings, float):
+                error = 'НЕКОРРЕКТНЫЕ ПОКАЗАНИЯ СЧЕТЧИКА'
                 break
             if not isinstance(data.verification_date, datetime.datetime):
                 error = 'НЕКОРРЕКТНАЯ ДАТА ПОВЕРКИ'
