@@ -176,9 +176,10 @@ def processing(file, user_id):
             if data.verification_date < datetime.datetime(2022, 12, 31, 00, 00, 00):
                 error = '2022 ГОД'
                 break
-            if data.verification_date.day <= data.valid_date.day:
-                error = 'НЕКОРРЕКТНАЯ ДАТА ДЕЙСТВИТЕЛЬНО ДО'
-                break
+            if data.valid_date:
+                if data.verification_date.day <= data.valid_date.day:
+                    error = 'НЕКОРРЕКТНАЯ ДАТА ДЕЙСТВИТЕЛЬНО ДО'
+                    break
             if data.verification_date > datetime.datetime.now():
                 error = 'ДАТА ПОВЕРКИ В БУДУЩЕМ ПЕРИОДЕ'
                 break
@@ -200,7 +201,7 @@ def processing(file, user_id):
             if not verifier:
                 error = 'УКАЗАННЫЙ ПОВЕРИТЕЛЬ НЕ НАЙДЕН'
                 break
-            if not isinstance(data.readings, float):
+            if not isinstance(data.readings, float) or not isinstance(data.readings, int):
                 error = 'НЕКОРРЕКТНЫЕ ПОКАЗАНИЯ СЧЕТЧИКА'
                 break
             if not isinstance(data.verification_date, datetime.datetime):
