@@ -178,7 +178,7 @@ def processing(file, user_id):
                 error = '2022 ГОД'
                 break
             if data.valid_date:
-                if data.verification_date.day <= data.valid_date.day:
+                if data.verification_date.day == data.valid_date.day:
                     error = 'НЕКОРРЕКТНАЯ ДАТА ДЕЙСТВИТЕЛЬНО ДО'
                     break
             if data.verification_date > datetime.datetime.now():
