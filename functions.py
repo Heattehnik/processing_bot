@@ -42,7 +42,7 @@ def get_standart_type(standart_fif):
     return result[0]
 
 
-def insert_data(data: object, user_id: int) -> tuple:
+def insert_data(data: Data, user_id: int) -> tuple:
     cursor.execute(f"SELECT si_number, verification_date, intern  FROM uploaded_data WHERE "
                    f"si_number = '{data.si_number}'")
     result = cursor.fetchone()
@@ -50,19 +50,21 @@ def insert_data(data: object, user_id: int) -> tuple:
         cursor.execute('INSERT INTO uploaded_data (act_num, ngr, si_type, si_number, owner,'
                        'address, readings, water_temp, verification_date, valid_date, air_temp, humidity,'
                        'atm_pressure, qmin, qmax, intern, standart, phone, processing_date, user_id, valid_for, '
-                       'conclusion, verifier_surname, verifier_name, verifier_patronymic, xml, standart_fif, mp) '
-                       'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                       'conclusion, verifier_surname, verifier_name, verifier_patronymic, xml, standart_fif, mp, '
+                       'production_date) '
+                       'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                        (data.act_num, data.ngr, data.si_type, data.si_number, data.owner, data.address, data.readings,
                         data.water_temp, data.verification_date, data.valid_date, data.air_temp, data.humidity,
                         data.atm_pressure, data.qmin, data.qmax, data.intern, data.standart, data.phone,
                         data.processing_date, user_id, data.valid_for, data.conclusion, data.verifier_surname,
-                        data.verifier_name, data.verifier_patronymic, 0, data.standart_fif, data.mp))
+                        data.verifier_name, data.verifier_patronymic, 0, data.standart_fif, data.mp,
+                        data.production_date))
         connect.commit()
     else:
         return result
 
 
-def get_existing_coiunters(data):
+def get_existing_counters(data):
     cursor.execute(f"SELECT si_number, verification_date, intern  FROM uploaded_data WHERE "
                    f"si_number = '{data.si_number}' AND xml = '1'")
     result = cursor.fetchone()
@@ -109,6 +111,7 @@ def is_allowed_id(user_id: int):
     else:
         return 0
 
+
 def get_standart_fif(data):
     cursor.execute(f'SELECT standart_fif FROM standarts WHERE standart_manufacture_num LIKE "{data.standart}" AND '
                    f'standart_valid_until >= "{data.verification_date}" ')
@@ -141,25 +144,26 @@ def processing(file, user_id):
             data.ngr = str(sheet_read[f'B{i}'].value).replace(' ', '')
             data.si_type = sheet_read[f'C{i}'].value
             data.si_number = str(sheet_read[f'D{i}'].value).strip()
-            data.owner = sheet_read[f'E{i}'].value
-            data.address = sheet_read[f'F{i}'].value
-            data.readings = sheet_read[f'G{i}'].value
-            print(type(data.readings))
-            data.water_temp = sheet_read[f'H{i}'].value
-            data.verification_date = sheet_read[f'I{i}'].value
-            data.valid_date = sheet_read[f'J{i}'].value
-            data.air_temp = sheet_read[f'K{i}'].value
-            data.humidity = sheet_read[f'L{i}'].value
-            data.atm_pressure = sheet_read[f'M{i}'].value
-            data.qmin = sheet_read[f'N{i}'].value
-            data.qmax = sheet_read[f'O{i}'].value
-            data.intern = sheet_read[f'Q{i}'].value.partition(' ')[0].upper()
-            data.standart = sheet_read[f'R{i}'].value
+            data.production_date = sheet_read[f'E{i}'].value
+            data.owner = sheet_read[f'F{i}'].value
+            data.address = sheet_read[f'G{i}'].value
+            data.readings = sheet_read[f'H{i}'].value
+            data.water_temp = sheet_read[f'I{i}'].value
+            data.verification_date = sheet_read[f'J{i}'].value
+            data.valid_date = sheet_read[f'K{i}'].value
+            data.air_temp = sheet_read[f'L{i}'].value
+            data.humidity = sheet_read[f'M{i}'].value
+            data.atm_pressure = sheet_read[f'N{i}'].value
+            data.qmin = sheet_read[f'O{i}'].value
+            data.qmax = sheet_read[f'P{i}'].value
+            data.intern = sheet_read[f'R{i}'].value.partition(' ')[0].upper()
+            data.standart = sheet_read[f'S{i}'].value
             data.standart_fif = get_standart_fif(data)
-            data.phone = sheet_read[f'S{i}'].value
+            data.phone = sheet_read[f'T{i}'].value
             data.processing_date = datetime.datetime.now()
             verifier = choose_verifier(data.intern)
             data.mp = get_mp(data.ngr)
+
             if verifier:
                 splited_verifier = verifier[0].split(' ')
                 data.verifier_surname = splited_verifier[0]
@@ -218,7 +222,7 @@ def processing(file, user_id):
                 error = 'ЭТАЛОН НЕ НАЙДЕН'
                 break
             insert_data(data, user_id)
-            inserted = get_existing_coiunters(data)
+            inserted = get_existing_counters(data)
             if inserted:
                 existing_counters.append(inserted)
 
@@ -226,7 +230,6 @@ def processing(file, user_id):
         return error, i, existing_counters
     except Exception as e:
         return e, i, existing_counters
-
 
 
 def make_file(date):
@@ -364,17 +367,3 @@ def make_xml(user_id):
 
     return doc, len(output)
 
-def make_mp():
-    for i in range(1, 30000):
-        cursor.execute(f'SELECT * FROM uploaded_data WHERE mp = "0" AND id = "{i}"')
-        result = cursor.fetchone()
-        print(i)
-        if result:
-            mp = get_mp(result[2])
-            cursor.execute(f'UPDATE uploaded_data SET mp = "{mp}" WHERE mp = "0" AND id = "{i}"')
-            connect.commit()
-    return result
-
-
-# if __name__ == "__main__":
-#     make_mp()

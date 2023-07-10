@@ -1,6 +1,6 @@
 from env import BOT_TOKEN
 import telebot
-from functions import processing, make_file, is_allowed_id, user_reg, user_delete, make_xml, set_protocol_to_1
+from functions import processing, is_allowed_id, user_reg, user_delete, make_xml, set_protocol_to_1
 from protocol import get_data_for_protocol, make_protocols, make_zip
 import os
 
