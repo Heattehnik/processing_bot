@@ -25,8 +25,11 @@ def from_db_for_protocol(user_id):
     return result
 
 
-def set_protocol_to_1(user_id):
-    cursor.execute(f'UPDATE uploaded_data SET protocol = "1" WHERE protocol = "0" AND user_id = "{user_id}"')
+def set_protocol_to_1(user_id, si_number):
+    cursor.execute(f'UPDATE uploaded_data SET protocol = "1" '
+                   f'WHERE protocol = "0" '
+                   f'AND user_id = "{user_id}" '
+                   f'AND si_number = "{si_number}"')
     connect.commit()
 
 

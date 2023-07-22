@@ -76,7 +76,7 @@ class Protocol:
         self.conclusion = None
         self.intern = None
         self.standart_fif = None
-        self.production_date = None
+        self.production_date = ''
 
     def __str__(self):
         return f'{self.ngr}\n{self.si_type}\n{self.si_number}\n{self.owner}\n{self.address}\n{self.readings_start}\n' \
