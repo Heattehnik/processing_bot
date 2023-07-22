@@ -21,7 +21,7 @@ def ngr_check(ngr: str) -> bool:
 
 def from_db_for_protocol(user_id):
     cursor.execute(f"SELECT * FROM uploaded_data WHERE protocol = 0 AND user_id = {user_id}")
-    result = cursor.fetchall()
+    result = cursor.fetchmany(3000)
     return result
 
 
