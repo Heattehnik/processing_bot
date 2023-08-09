@@ -1,3 +1,6 @@
 /.idea
 /venv
 /protocols
+test.xlsx
+env.py
+db_tools.py
