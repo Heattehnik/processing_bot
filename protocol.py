@@ -43,7 +43,8 @@ def get_data_for_protocol(user_id):
             current_protocol.water_temp_start = protocol[8]
             current_protocol.standart_fif = protocol[20]
             current_protocol.standart = get_standart_type(current_protocol.standart_fif)
-            current_protocol.production_date = protocol[30]
+            if protocol[30]:
+                current_protocol.production_date = protocol[30]
             current_protocol.protocol_number = f"{INTERNS.get(protocol[18])}.{datetime.datetime.strptime(protocol[9], '%Y-%m-%d %H:%M:%S').strftime('%y.%m')}.{current_protocol.si_number}"
             current_protocol.set_temp()
             current_protocol.set_flow_rates()

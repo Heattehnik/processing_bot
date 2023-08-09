@@ -57,13 +57,15 @@ def start_protocol(message):
         bot.send_message(message.chat.id, 'Извините! Вы не зарегестрированы!')
     else:
         try:
-            bot.send_message(message.chat.id, "Формирование протоколов начато...")
             protocol_list = get_data_for_protocol(message.chat.id)
+            bot.send_message(message.chat.id, f"Формирование {len(protocol_list)} протоколов начато...")
             result = make_protocols(protocol_list)
+            for item in protocol_list:
+                set_protocol_to_1(message.chat.id, item.si_number)
             bot.send_message(message.chat.id, f"Сформировано {result} протоколов. Подготавливается файл к отправке. "
                                               f"Подождите...")
             zip_file = make_zip()
-            set_protocol_to_1(message.chat.id)
+
             bot.send_document(message.chat.id, zip_file, visible_file_name='protocols.zip')
             os.remove(f'protocols.zip')
         except Exception as e:
