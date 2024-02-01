@@ -1,26 +1,10 @@
-import requests
-
-
-json_string = {
-  "headers": {
-    "accept": "*/*",
-    "accept-language": "ru,en;q=0.9",
-    "content-type": "multipart/form-data; boundary=----WebKitFormBoundaryEgwnCnYt6VYRDjq7",
-    "sec-ch-ua": "\"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"108\", \"Yandex\";v=\"23\"",
-    "sec-ch-ua-mobile": "?0",
-    "sec-ch-ua-platform": "\"Windows\"",
-    "sec-fetch-dest": "empty",
-    "sec-fetch-mode": "cors",
-    "sec-fetch-site": "same-origin"
-  },
-  "referrer": "https://support.fsa.gov.ru/",
-  "referrerPolicy": "strict-origin-when-cross-origin",
-  "body": "------WebKitFormBoundaryEgwnCnYt6VYRDjq7\r\nContent-Disposition: form-data; name=\"alType\"\r\n\r\nmeasurements\r\n------WebKitFormBoundaryEgwnCnYt6VYRDjq7\r\nContent-Disposition: form-data; name=\"alNumber\"\r\n\r\nRA.RU.320019\r\n------WebKitFormBoundaryEgwnCnYt6VYRDjq7\r\nContent-Disposition: form-data; name=\"email\"\r\n\r\nalexdyachenko@mail.ru\r\n------WebKitFormBoundaryEgwnCnYt6VYRDjq7\r\nContent-Disposition: form-data; name=\"reportFields\"\r\n\r\n{\"checkNumber\":\"16078-13\",\"checkDate\":\"2023-02-12\",\"limitation\":\"6\",\"measurementType\":\"СГВ-15\",\"measurementResult\":\"Пригодно\",\"verificatorSecondName\":\"Пономарёв\",\"verificatorName\":\"Никита\",\"verificatorPatronymic\":\"Михайлович\"}\r\n------WebKitFormBoundaryEgwnCnYt6VYRDjq7--\r\n",
-  "method": "POST",
-  "mode": "cors",
-  "credentials": "include"
-}
-
-request = requests.post('https://support.fsa.gov.ru/api/reports/metrology', json=json_string)
-
-print(request.text)
+{'5967392 А17': {'result_docnum': 'С-ГШИ/07-01-2024/307129567', 'vri_id': '1-307129567'},
+ '2551854': {'result_docnum': 'С-ГШИ/07-01-2024/307129566', 'vri_id': '1-307129566'},
+ '1016214886301': {'result_docnum': 'С-ГШИ/07-01-2024/308786199', 'vri_id': '1-308786199'},
+ '87235677': {'result_docnum': 'С-ГШИ/07-01-2024/310100800', 'vri_id': '1-310100800'},
+ '1134101': {'result_docnum': 'И-ГШИ/07-01-2024/310100799', 'vri_id': '1-310100799'},
+ '38749640': {'result_docnum': 'С-ГШИ/07-01-2024/310100798', 'vri_id': '1-310100798'},
+ '0181012': {'result_docnum': 'С-ГШИ/07-01-2024/310100292', 'vri_id': '1-310100292'},
+ '0181063': {'result_docnum': 'С-ГШИ/07-01-2024/310100291', 'vri_id': '1-310100291'},
+ '0181107': {'result_docnum': 'С-ГШИ/07-01-2024/310100290', 'vri_id': '1-310100290'},
+ '0181057': {'result_docnum': 'С-ГШИ/07-01-2024/310100289', 'vri_id': '1-310100289'}}

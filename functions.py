@@ -275,6 +275,103 @@ def make_file(date):
         pass
 
 
+def from_db_to_xml():
+    query = '''SELECT result_docnum, verification_date, valid_date, si_type, verifier_surname, verifier_name 
+    FROM uploaded_data WHERE fsa = 0 and result_docnum NOT NULL
+    '''
+    cursor.execute(query)
+    return cursor.fetchall()
+
+
+def set_fsa_to_1(result_docnum):
+    query = '''UPDATE uploaded_data SET fsa=1 WHERE result_docnum IS ?'''
+    cursor.execute(query, (result_docnum,))
+    connect.commit()
+
+
+def get_verifier_snils(verifier_surname):
+    query = '''SELECT snils FROM real_verifiers WHERE verifier LIKE ? '''
+    cursor.execute(query, (f'%{verifier_surname}%',))
+    return cursor.fetchone()
+
+
+def make_fsa_xml():
+    # Получаем данные из базы данных
+    data_from_db = from_db_to_xml()
+
+    # Создаем корневой элемент
+    root = xml.Element("Message")
+    root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
+    root.set("xsi:noNamespaceSchemaLocation", "schema.xsd")
+
+    # Создаем элемент VerificationMeasuringInstrumentData
+    vmi_data_element = xml.SubElement(root, "VerificationMeasuringInstrumentData")
+
+    # Проходим по данным из базы и создаем элементы VerificationMeasuringInstrument
+    count_records = 0
+    file_counter = 1
+
+    for data in data_from_db:
+        # Если достигнуто максимальное количество записей, создаем новый файл
+        if count_records == 100:
+            save_xml_file(root, file_counter)
+            file_counter += 1
+            count_records = 0
+            # Обновляем корень и элемент для нового файла
+            root = xml.Element("Message")
+            root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
+            root.set("xsi:noNamespaceSchemaLocation", "schema.xsd")
+            vmi_data_element = xml.SubElement(root, "VerificationMeasuringInstrumentData")
+
+        vmi_element = xml.SubElement(vmi_data_element, "VerificationMeasuringInstrument")
+
+        # Добавляем подэлементы с данными
+        number_verification_element = xml.SubElement(vmi_element, "NumberVerification")
+        number_verification_element.text = data[0]
+
+        date_verification_element = xml.SubElement(vmi_element, "DateVerification")
+        date_verification_element.text = data[1]
+        date_verification_end_element = xml.SubElement(vmi_element, "DateEndVerification")
+        result_element = xml.SubElement(vmi_element, "ResultVerification")
+        result_element.text = '2'
+
+        if data[2]:
+            date_verification_end_element.text = data[2]
+            result_element.text = '1'
+        tmi_element = xml.SubElement(vmi_element, "TypeMeasuringInstrument")
+        tmi_element.text = data[3]
+        aproved_employee_element = xml.SubElement(vmi_element, "ApprovedEmployee")
+        name_element = xml.SubElement(aproved_employee_element, "Name")
+        first_name_element = xml.SubElement(name_element, "First")
+        first_name_element.text = data[5]
+        last_name_element = xml.SubElement(name_element, "Last")
+        last_name_element.text = data[4]
+
+
+
+        # Пример использования get_verifier_snils для получения SNILS
+        verifier_surname = data[4]
+        snils_data = get_verifier_snils(verifier_surname)
+
+        if snils_data:
+            snils_element = xml.SubElement(aproved_employee_element, "SNILS")
+            snils_element.text = snils_data[0]
+
+        # Добавьте остальные элементы данных по аналогии...
+
+        count_records += 1
+
+    # Сохраняем последний XML-файл
+    if count_records > 0:
+        save_xml_file(root, file_counter)
+
+
+def save_xml_file(root, file_counter):
+    # Сохраняем XML-файл
+    xml_tree = xml.ElementTree(root)
+    xml_tree.write(f"output_{file_counter}.xml", encoding="utf-8", xml_declaration=True)
+
+
 def to_xml(user_id):
     cursor.execute(f'SELECT * FROM uploaded_data WHERE xml = "0" AND user_id = "{user_id}"')
     result = cursor.fetchall()
@@ -370,3 +467,6 @@ def make_xml(user_id):
 
     return doc, len(output)
 
+
+if __name__ == '__main__':
+    make_fsa_xml()

@@ -4,6 +4,8 @@ from dateutil.relativedelta import relativedelta
 from time import sleep
 from functions import connect, cursor
 import openpyxl as op
+import requests
+import time
 
 
 def compare_dates():
@@ -95,19 +97,88 @@ def count_verifies_2(date_1, date_2, standards):
     return result
 
 
-if __name__ == '__main__':
+def get_verifies_without_vri_id(date):
 
-    input_1 = input('Введите начальную дату\n')
-    start_date = datetime.strptime(input_1, '%d.%m.%Y')
-    input_2 = input('Введите конечную дату\n')
-    end_date = datetime.strptime(input_2, '%d.%m.%Y')
-    standards = [910, 602, 2541, 2671]# get_standards()
-    total = count_verifies_2(start_date, end_date, standards)
-    for date, standarts in total.items():
-        print(date, end='\n')
-        for standart, count in standarts.items():
-            print(standart, count)
-        print('\n')
+    query = "SELECT ngr, si_number, verification_date FROM uploaded_data WHERE strftime('%s', verification_date) = strftime('%s', ?) AND vri_id is NULL"
+    cursor.execute(query, (date, ))
+    fetch = cursor.fetchall()
+    return fetch if len(fetch) else []
+
+
+def get_data_from_arshin(verifies_data):
+    result_dict = {}
+    if verifies_data:
+        for data in verifies_data:
+            params = {
+                'mit_number': data[0],
+                'mi_number': data[1],
+                'verification_date': data[2],
+                'year': data[2][0:4],
+                'org_title': 'Индивидуальный предприниматель Дьяченко Алексей Олегович',
+            }
+            url = f'https://fgis.gost.ru/fundmetrology/eapi/vri'
+            req = requests.get(url, params=params)
+
+            try:
+                req_json = req.json()
+                result_dict.update({
+                    data[1]: {
+                        'result_docnum': req_json['result']['items'][0]['result_docnum'],
+                        'vri_id': req_json['result']['items'][0]['vri_id'],
+                    }
+                })
+            except:
+                pass
+            sleep(0.5)
+    return result_dict
+
+
+def update_vri_id(key, input_data) -> None:
+    query = "UPDATE uploaded_data SET vri_id=?, result_docnum=? WHERE si_number=?"
+    cursor.execute(query, (input_data['vri_id'], input_data['result_docnum'], key))
+    connect.commit()
+
+
+def set_vri_id(start_date: str, end_date: str) -> str:
+    start_date = datetime.strptime(start_date, '%d.%m.%Y')
+    end_date = datetime.strptime(end_date, '%d.%m.%Y')
+    current_date = start_date
+    while current_date < end_date:
+        current_date = current_date + timedelta(days=1)
+        from_db = get_verifies_without_vri_id(current_date)
+        from_arshin = get_data_from_arshin(from_db)
+        for k, v in from_arshin.items():
+            update_vri_id(k, v)
+    return 'Job is done'
+
+
+    # while current_date < date_2:
+    #     result[datetime.strftime(current_date, '%d.%m.%Y')] = {}
+    #     for standart in standards:
+    #         count = get_by_date_2(current_date, standart)
+    #         if count[0]:
+    #             result[datetime.strftime(current_date, '%d.%m.%Y')].update({standart: count[0]})
+    #     result[datetime.strftime(current_date, '%d.%m.%Y')] = dict(
+    #         sorted(result[datetime.strftime(current_date, '%d.%m.%Y')].items(), key=lambda x: x[1], reverse=True))
+    #     current_date += timedelta(days=1)
+    # return result
+
+
+if __name__ == '__main__':
+    start = datetime.now()
+    set_vri_id('01.01.2024', '08.01.2024')
+    end = datetime.now()
+    print(f'Finished in {end - start}')
+
+    # input_2 = input('Введите конечную дату\n')
+    # end_date = datetime.strptime(input_2, '%d.%m.%Y')
+    # standards = [910, 602, 2541, 2671]# get_standards()
+    # total = count_verifies_2(start_date, end_date, standards)
+    # for date, standarts in total.items():
+    #     print(date, end='\n')
+    #     for standart, count in standarts.items():
+    #         print(standart, count)
+    #     print('\n')
 
 
     # # input_3 = input('Введите имя поверителя\n')
