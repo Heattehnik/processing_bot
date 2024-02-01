@@ -330,23 +330,24 @@ def make_fsa_xml():
         number_verification_element.text = data[0]
 
         date_verification_element = xml.SubElement(vmi_element, "DateVerification")
-        date_verification_element.text = data[1]
+        date_verification_element.text = data[1][:10]
         date_verification_end_element = xml.SubElement(vmi_element, "DateEndVerification")
-        result_element = xml.SubElement(vmi_element, "ResultVerification")
-        result_element.text = '2'
 
-        if data[2]:
-            date_verification_end_element.text = data[2]
-            result_element.text = '1'
+
+
         tmi_element = xml.SubElement(vmi_element, "TypeMeasuringInstrument")
         tmi_element.text = data[3]
         aproved_employee_element = xml.SubElement(vmi_element, "ApprovedEmployee")
         name_element = xml.SubElement(aproved_employee_element, "Name")
+        last_name_element = xml.SubElement(name_element, "Last")
         first_name_element = xml.SubElement(name_element, "First")
         first_name_element.text = data[5]
-        last_name_element = xml.SubElement(name_element, "Last")
         last_name_element.text = data[4]
-
+        result_element = xml.SubElement(vmi_element, "ResultVerification")
+        result_element.text = '2'
+        if data[2]:
+            date_verification_end_element.text = data[2][:10]
+            result_element.text = '1'
 
 
         # Пример использования get_verifier_snils для получения SNILS
@@ -368,6 +369,8 @@ def make_fsa_xml():
 
 def save_xml_file(root, file_counter):
     # Сохраняем XML-файл
+    save_method_element = xml.SubElement(root, "SaveMethod")
+    save_method_element.text = "1"
     xml_tree = xml.ElementTree(root)
     xml_tree.write(f"output_{file_counter}.xml", encoding="utf-8", xml_declaration=True)
 
