@@ -72,4 +72,19 @@ def start_protocol(message):
             bot.send_message(message.chat.id, f"{e}")
 
 
+# @bot.message_handler(commands=['vri_update'])
+# def vri_update(message):
+#     if is_allowed_id(message.from_user.id) != message.from_user:
+#         bot.send_message(message.chat.id, 'Извините! Вы не зарегестрированы!')
+#     else:
+#         bot.send_message(message.chat.id, 'Введите начальную дату в формате xx.xx.xxxx')
+#         bot.register_next_step_handler(message, start_date)
+#
+#
+# def start_date(message):
+
+
+
+
+
 bot.polling()

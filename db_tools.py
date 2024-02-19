@@ -8,18 +8,18 @@ import requests
 import time
 
 
-def compare_dates():
-    cursor.execute(f'SELECT verification_date, valid_date FROM uploaded_data WHERE si_number = "I3223557"')
-    fetch = cursor.fetchone()
-    date1 = datetime.strptime(fetch[0][:10], '%Y-%m-%d')
-    date2 = datetime.strptime(fetch[1][:10], '%Y-%m-%d')
-    if date1.day == date2.day:
-        print(f'{date1.date()}\n'
-              f'{date2.date()}')
-        print('Found')
-    else:
-        print(date1.date(), date2.date())
-        print('Not found')
+# def compare_dates():
+#     cursor.execute(f'SELECT verification_date, valid_date FROM uploaded_data WHERE si_number = "I3223557"')
+#     fetch = cursor.fetchone()
+#     date1 = datetime.strptime(fetch[0][:10], '%Y-%m-%d')
+#     date2 = datetime.strptime(fetch[1][:10], '%Y-%m-%d')
+#     if date1.day == date2.day:
+#         print(f'{date1.date()}\n'
+#               f'{date2.date()}')
+#         print('Found')
+#     else:
+#         print(date1.date(), date2.date())
+#         print('Not found')
 
 
 def strip_numbers():
@@ -114,21 +114,22 @@ def get_data_from_arshin(verifies_data):
                 'mi_number': data[1],
                 'verification_date': data[2],
                 'year': data[2][0:4],
-                'org_title': 'Индивидуальный предприниматель Дьяченко Алексей Олегович',
+                'org_title': 'Индивидуальный предприниматель Дьяченко Алексей Олегович', #"ООО \"ВОДОРЕСУРС\"" # 'Индивидуальный предприниматель Дьяченко Алексей Олегович'
             }
             url = f'https://fgis.gost.ru/fundmetrology/eapi/vri'
             req = requests.get(url, params=params)
 
             try:
                 req_json = req.json()
-                result_dict.update({
-                    data[1]: {
-                        'result_docnum': req_json['result']['items'][0]['result_docnum'],
-                        'vri_id': req_json['result']['items'][0]['vri_id'],
-                    }
-                })
-            except:
-                pass
+                if req_json['result']['count'] != 0:
+                    result_dict.update({
+                        data[1]: {
+                            'result_docnum': req_json['result']['items'][0]['result_docnum'],
+                            'vri_id': req_json['result']['items'][0]['vri_id'],
+                        }
+                    })
+            except Exception as e:
+                print(e)
             sleep(0.5)
     return result_dict
 
@@ -166,13 +167,17 @@ def set_vri_id(start_date: str, end_date: str) -> str:
 
 if __name__ == '__main__':
     start = datetime.now()
-    set_vri_id('01.01.2024', '08.01.2024')
+    set_vri_id('20.01.2024', '29.02.2024')
     end = datetime.now()
     print(f'Finished in {end - start}')
 
+    # input_1 = input('Введите начальную дату\n')
+    # start_date = datetime.strptime(input_1, '%d.%m.%Y')
     # input_2 = input('Введите конечную дату\n')
     # end_date = datetime.strptime(input_2, '%d.%m.%Y')
-    # standards = [910, 602, 2541, 2671]# get_standards()
+
+    # Расчёт поверок на эталон
+    # standards = get_standards()
     # total = count_verifies_2(start_date, end_date, standards)
     # for date, standarts in total.items():
     #     print(date, end='\n')
@@ -180,10 +185,8 @@ if __name__ == '__main__':
     #         print(standart, count)
     #     print('\n')
 
-
-    # # input_3 = input('Введите имя поверителя\n')
-    # # man = input_3
-    # for verifier in VANIN:
+    # Отчёт поверок Комарских
+    # for verifier in KOMAR:
     #     verifies_count = count_verifies(start_date, end_date, verifier)
     #     if sum(verifies_count.values()) != 0:
     #         generate_excel(verifies_count, verifier)

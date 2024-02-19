@@ -2,3 +2,4 @@ pyTelegramBotAPI~=4.10.0
 openpyxl~=3.1.1
 python-dateutil~=2.8.2
 docxtpl~=0.16.4
+aiohttp

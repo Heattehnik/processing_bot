@@ -313,7 +313,7 @@ def make_fsa_xml():
 
     for data in data_from_db:
         # Если достигнуто максимальное количество записей, создаем новый файл
-        if count_records == 100:
+        if count_records == 1000:
             save_xml_file(root, file_counter)
             file_counter += 1
             count_records = 0
@@ -331,7 +331,8 @@ def make_fsa_xml():
 
         date_verification_element = xml.SubElement(vmi_element, "DateVerification")
         date_verification_element.text = data[1][:10]
-        date_verification_end_element = xml.SubElement(vmi_element, "DateEndVerification")
+        if data[2]:
+            date_verification_end_element = xml.SubElement(vmi_element, "DateEndVerification")
 
 
 
@@ -359,7 +360,7 @@ def make_fsa_xml():
             snils_element.text = snils_data[0]
 
         # Добавьте остальные элементы данных по аналогии...
-
+        set_fsa_to_1(data[0])
         count_records += 1
 
     # Сохраняем последний XML-файл
@@ -372,7 +373,7 @@ def save_xml_file(root, file_counter):
     save_method_element = xml.SubElement(root, "SaveMethod")
     save_method_element.text = "1"
     xml_tree = xml.ElementTree(root)
-    xml_tree.write(f"output_{file_counter}.xml", encoding="utf-8", xml_declaration=True)
+    xml_tree.write(f"dyachenko_{file_counter}.xml", encoding="utf-8", xml_declaration=True)
 
 
 def to_xml(user_id):
