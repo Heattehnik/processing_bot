@@ -1,6 +1,6 @@
 from env import BOT_TOKEN
 import telebot
-from functions import processing, is_allowed_id, user_reg, user_delete, make_xml, set_protocol_to_1
+from functions import processing, is_allowed_id, user_reg, user_delete, make_xml, set_protocol_to_1, file_send
 from protocol import get_data_for_protocol, make_protocols, make_zip
 import os
 
@@ -21,34 +21,60 @@ def welcome(message):
     if is_allowed_id(message.from_user.id) != message.from_user.id:
         bot.send_message(message.chat.id, 'Извините! Вы не зарегестрированы!')
     else:
-        bot.send_message(message.chat.id, "Отправьте файл для обработки")
-        bot.register_next_step_handler(message, processing_file)
+        keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+        button_1 = telebot.types.KeyboardButton(text="ИП Дьяченко Алексей Олегович")
+        button_2 = telebot.types.KeyboardButton(text="ООО Водоресурс")
+        keyboard.add(button_1, button_2)
+        bot.send_message(message.chat.id, "Выберите организацию", reply_markup=keyboard)
+        bot.register_next_step_handler(message, set_organization)
 
 
-def processing_file(message):
-    file_info = bot.get_file(message.document.file_id)
-    downloaded_file = bot.download_file(file_info.file_path)
-    with open('temp.xlsx', 'wb') as file:
-        file.write(downloaded_file)
-    bot.send_message(message.chat.id, 'Ожидайте завершения обработки...')
-    check = processing('temp.xlsx', message.from_user.id)
-    if check[2]:
-        bot.send_message(message.chat.id, 'Внимание! Обнаружены ранее внесенные счетчики!')
-        for item in check[2]:
-            bot.send_message(message.chat.id, f'Заводской номер: {item[0]}\n'
-                                              f'Дата поверки: {".".join(reversed(item[1][:10].split("-")))}\n'
-                                              f'Поверитель: {item[2].title()}')
-    if check[0]:
-        bot.send_message(message.chat.id, f'Ошибка в строке {check[1] - 1} {check[0]}')
+def set_organization(message):
+    if message.text:
+        bot.send_message(message.chat.id, 'Отправьте файл для обработки', reply_markup=telebot.types.ReplyKeyboardRemove())
+        bot.register_next_step_handler(message, processing_file, message.text)
     else:
+        keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+        button_1 = telebot.types.KeyboardButton(text="ИП Дьяченко Алексей Олегович")
+        button_2 = telebot.types.KeyboardButton(text="ООО Водоресурс")
+        keyboard.add(button_1, button_2)
+        bot.send_message(message.chat.id, 'Выберите организацию', reply_markup=keyboard)
+        bot.register_next_step_handler(message, set_organization)
 
-        bot.send_message(message.chat.id, 'Обработка завершена!')
-        xml_ = make_xml(message.chat.id)
-        with open(f'{message.document.file_name[:-5]} ---{xml_[1]}.xml', 'a+') as file:
-            file.writelines(xml_[0])
-            file.seek(0)
-            bot.send_document(message.chat.id, file)
-        os.remove(f'{message.document.file_name[:-5]} ---{xml_[1]}.xml')
+
+def processing_file(message, organization):
+    if message.document:
+        file_info = bot.get_file(message.document.file_id)
+        downloaded_file = bot.download_file(file_info.file_path)
+        with open('temp.xlsx', 'wb') as file:
+            file.write(downloaded_file)
+        bot.send_message(message.chat.id, 'Ожидайте завершения обработки...')
+        check = file_send('temp.xlsx', message.from_user.id, organization, message.chat.id)
+        if check.get('errors'):
+            reply = []
+            errors = check.pop('errors')
+            for row, error in errors.items():
+                joined_errors = "\n".join(error)
+                string = f'{row}:\n {joined_errors}'
+                reply.append(string)
+            reply = "\n".join(reply)
+            row = check['message']
+            bot.send_message(message.chat.id, f'{row} \n{reply}')
+        else:
+            bot.send_message(message.chat.id, 'Обработка завершена!')
+    else:
+        keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+        button_1 = telebot.types.KeyboardButton(text="ИП Дьяченко Алексей Олегович")
+        button_2 = telebot.types.KeyboardButton(text="ООО Водоресурс")
+        keyboard.add(button_1, button_2)
+        bot.send_message(message.chat.id, 'Выберите организацию', reply_markup=keyboard)
+        bot.register_next_step_handler(message, set_organization)
+        # xml_ = make_xml(message.chat.id)
+        # with open(f'{message.document.file_name[:-5]} ---{xml_[1]}.xml', 'a+') as file:
+        #     file.writelines(xml_[0])
+        #     file.seek(0)
+        #     bot.send_document(message.chat.id, file)
+        # os.remove(f'{message.document.file_name[:-5]} ---{xml_[1]}.xml')
 
 
 @bot.message_handler(commands=['protocol'])

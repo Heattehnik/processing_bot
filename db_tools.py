@@ -130,6 +130,8 @@ def get_data_from_arshin(verifies_data):
                     })
             except Exception as e:
                 print(e)
+                print(params)
+                print(req_json)
             sleep(0.5)
     return result_dict
 
@@ -167,7 +169,7 @@ def set_vri_id(start_date: str, end_date: str) -> str:
 
 if __name__ == '__main__':
     start = datetime.now()
-    set_vri_id('20.01.2024', '29.02.2024')
+    set_vri_id('20.01.2024', '31.03.2024')
     end = datetime.now()
     print(f'Finished in {end - start}')
 

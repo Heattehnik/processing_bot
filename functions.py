@@ -5,6 +5,7 @@ import openpyxl as op
 from classes import Data
 import datetime
 from dateutil.relativedelta import relativedelta
+import requests
 
 connect = sqlite3.connect(DATA_BASE, check_same_thread=False)
 cursor = connect.cursor()
@@ -470,6 +471,15 @@ def make_xml(user_id):
           'module-verifications/import/2020-06-19">' + final + '</gost:application>'
 
     return doc, len(output)
+
+
+def file_send(file_name, user, organization, chat_id):
+    url = 'http://127.0.0.1:8000/api/v1/verifications/upload/'
+    file = {'file': open(file_name, 'rb')}
+    data = {'user': user, 'organization':organization, 'chat_id': chat_id}
+    response = requests.post(url, data=data, files=file)
+    if response.status_code == 200 or response.status_code == 201:
+        return response.json()
 
 
 if __name__ == '__main__':
