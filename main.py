@@ -1,7 +1,8 @@
 from env import BOT_TOKEN
 import telebot
-from functions import processing, is_allowed_id, user_reg, user_delete, make_xml, set_protocol_to_1, file_send
+from functions import processing, is_allowed_id, user_reg, user_delete, make_xml, set_protocol_to_1, file_send, get_file
 from protocol import get_data_for_protocol, make_protocols, make_zip
+from keyboards import keyboard
 import os
 
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -21,10 +22,6 @@ def welcome(message):
     if is_allowed_id(message.from_user.id) != message.from_user.id:
         bot.send_message(message.chat.id, 'Извините! Вы не зарегестрированы!')
     else:
-        keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-        button_1 = telebot.types.KeyboardButton(text="ИП Дьяченко Алексей Олегович")
-        button_2 = telebot.types.KeyboardButton(text="ООО Водоресурс")
-        keyboard.add(button_1, button_2)
         bot.send_message(message.chat.id, "Выберите организацию", reply_markup=keyboard)
         bot.register_next_step_handler(message, set_organization)
 
@@ -34,10 +31,6 @@ def set_organization(message):
         bot.send_message(message.chat.id, 'Отправьте файл для обработки', reply_markup=telebot.types.ReplyKeyboardRemove())
         bot.register_next_step_handler(message, processing_file, message.text)
     else:
-        keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-        button_1 = telebot.types.KeyboardButton(text="ИП Дьяченко Алексей Олегович")
-        button_2 = telebot.types.KeyboardButton(text="ООО Водоресурс")
-        keyboard.add(button_1, button_2)
         bot.send_message(message.chat.id, 'Выберите организацию', reply_markup=keyboard)
         bot.register_next_step_handler(message, set_organization)
 
@@ -63,10 +56,6 @@ def processing_file(message, organization):
         else:
             bot.send_message(message.chat.id, 'Обработка завершена!')
     else:
-        keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-        button_1 = telebot.types.KeyboardButton(text="ИП Дьяченко Алексей Олегович")
-        button_2 = telebot.types.KeyboardButton(text="ООО Водоресурс")
-        keyboard.add(button_1, button_2)
         bot.send_message(message.chat.id, 'Выберите организацию', reply_markup=keyboard)
         bot.register_next_step_handler(message, set_organization)
         # xml_ = make_xml(message.chat.id)
@@ -75,6 +64,23 @@ def processing_file(message, organization):
         #     file.seek(0)
         #     bot.send_document(message.chat.id, file)
         # os.remove(f'{message.document.file_name[:-5]} ---{xml_[1]}.xml')
+
+@bot.message_handler(commands=['get_xml'])
+def start(message):
+    if is_allowed_id(message.from_user.id) != message.from_user.id:
+        bot.send_message(message.chat.id, 'Извините! Вы не зарегестрированы!')
+    else:
+        bot.send_message(message.chat.id, "Выберите организацию", reply_markup=keyboard)
+        bot.register_next_step_handler(message, get_xml)
+
+
+def get_xml(message):
+    organization = message.text
+    bot.send_message(message.chat.id, "Файл формируется. Ожидайте", reply_markup=telebot.types.ReplyKeyboardRemove())
+    get_file(message.from_user.id, organization, message.chat.id)
+
+
+
 
 
 @bot.message_handler(commands=['protocol'])
